@@ -7,6 +7,7 @@ Updated: 2/20/2020
 
 from cell import Cell
 from world import World
+from world_torus import World_Torus
 import toolbox
 import lifeTest
 from time import sleep
@@ -276,7 +277,7 @@ Press enter to continue""")
         :return: None
         """
         print("Creating World...")
-        w1 = World(self.__rows, self.__columns, self.__waitTime)
+        w1 = World_Torus(self.__rows, self.__columns, self.__waitTime)
         w1.random_fill(self.__percentLiving)
         self.__currentWorld = w1
         print(w1)
