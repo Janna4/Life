@@ -123,7 +123,7 @@ class World(object):
                 # 6. far right side
                 # 7. lower left corner
                 # 8. rest of bottom row
-                # 9. lower right corner (3 neighbors)
+                # 9. lower right corner
                 #
                 row = cell.get_row()
                 column = cell.get_column()
@@ -222,12 +222,17 @@ class World(object):
                         cell.add_neighbor(self.__grid[0][column - 1])
                         cell.add_neighbor(self.__grid[0][column])
                         cell.add_neighbor(self.__grid[0][column + 1])
-                    # lower right corner (3 neighbors)
+                    # lower right corner
                     else:
                         #print('lower right')
                         cell.add_neighbor(self.__grid[row][column - 1])
                         cell.add_neighbor(self.__grid[row - 1][column - 1])
                         cell.add_neighbor(self.__grid[row - 1][column])
+                        cell.add_neighbor(self.__grid[0][0])
+                        cell.add_neighbor(self.__grid[self.__rows - 1][0])
+                        cell.add_neighbor(self.__grid[self.__rows - 2][0])
+                        cell.add_neighbor(self.__grid[0][self.__columns - 2])
+                        cell.add_neighbor(self.__grid[0][self.__columns - 1])
 
     def set_cell(self, row, column, living):
         """
