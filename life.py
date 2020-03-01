@@ -11,6 +11,7 @@ from world_torus import World_Torus
 import toolbox
 import lifeTest
 from time import sleep
+import os
 
 class Life(object):
 
@@ -22,14 +23,6 @@ class Life(object):
         self.__waitTime = 0
         self.__pastWorlds = []
         self.main()
-
-    #def add_past_worlds(self):
-    #    """
-     #   Adds all worlds saved from the past into the list of past worlds
-      #  :return: None
-       # """
-        #for file in .\worlds:
-
 
     def __str__(self):
         pass
@@ -402,9 +395,11 @@ Press enter to continue""")
         #todo send in parameters and check userinput for filename legality (somewhere else)
         #todo send these into a worlds folder
         #todo set display back to what the user had after this
+        myPath = 'worlds'
         self.change_display(1)
         filename = input('What would you like to call the file you save this world in? ')
         filename += '.txt.lifeWorlds'
+        filename = os.path.join(myPath, filename)
         with open(filename, 'w') as outputFile:
             print("Writing file...")
             for row in self.__currentWorld.get_grid():
@@ -420,17 +415,37 @@ Press enter to continue""")
         :param fileNumber: this is the number of the file the user wants to open
         :return: None
         """
+        #
+        #todo there a re probabaly better ways to do this
+        #
+        numberOfFiles = 0
+        allFiles = os.listdir('worlds')
+        for file in allFiles:
+            numberOfFiles += 1
+
         if toolbox.is_integer(fileNumber):
             fileNumber = int(fileNumber)
-        counter = 1
-        for file in self.__pastWorlds:
-            print(counter, file)
+            if 0 < fileNumber <= numberOfFiles:
+                print("This file does not exist")
+                print("selecting default file...")
+                print()
+                fileNumber = 1
+        else:
+            counter = 1
+            for file in allFiles:
+                print(counter, file)
+                counter +=1
 
-        while fileNumber > counter:
-            print(f"File number must be between 1 and {counter}")
             fileNumber = toolbox.get_integer("Which file would you like to open? ")
 
-        filename = self.__pastWorlds[fileNumber - 1]
+            while fileNumber > numberOfFiles:
+                print(f"File number must be between 1 and {numberOfFiles}")
+                fileNumber = toolbox.get_integer("Which file would you like to open? ")
+
+        filename = allFiles[fileNumber - 1]
+
+        filename = os.path.join('worlds', filename)
+
         #
         # Finds the old worlds size for consistency
         #
@@ -450,11 +465,11 @@ Press enter to continue""")
         rowNumber = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
-                rowNumber += 1
                 for cell in row:
-                    columnNumber += 1
                     if cell == 'O':
-                        self.__currentWorld.set_cell(rowNumber, columnNumber - 1, True)
+                        self.__currentWorld.set_cell(rowNumber, columnNumber, True)
+                    columnNumber += 1
+                rowNumber += 1
                 columnNumber = 0
 
         print("Here is the old world")
