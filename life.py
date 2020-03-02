@@ -108,20 +108,11 @@ class Life(object):
                 self.new_size(parameter)
                 print("Finished!")
             elif command == "advance-life":
-                if parameter != None:
+                if parameter != None and toolbox.is_integer(parameter):
                     parameter = int(parameter)
                 else:
                     parameter = 1
-                    print("Advancing Time...")
-                for times in range(0, parameter):
-                    self.advance_life()
-                    print(self.__currentWorld)
-                    sleep(self.__waitTime)
-                print("Finished!")
-            elif command == "sim-1-generation":
-                print("Advancing Time...")
-                self.advance_life()
-                print(self.__currentWorld)
+                self.advance_life(parameter)
                 print("Finished!")
             elif command == "new-odds":
                 self.change_living_odds(parameter)
@@ -168,6 +159,14 @@ class Life(object):
                 self.show_menu()
                 command, parameter = self.get_command()
 
+    def repetition_check(self):
+        """
+        Check to see if the simulation has stopped changing
+        :return: a boolean
+        """
+        repetition = self.__currentWorld.repetition_check()
+        return repetition
+
     def show_menu(self):
         """
         Displays the menu.
@@ -192,7 +191,7 @@ class Life(object):
                     'h': 'help',
                     'c': 'create-world',
                     'a': 'advance-life',
-                    ' ': 'sim-1-generation',
+                    ' ': 'advance-life',
                     'f': 'fast-forward',
                     'r': 'display-acorn',
                     'l': 'display-l',
@@ -275,13 +274,22 @@ Press enter to continue""")
         self.__currentWorld = w1
         print(w1)
 
-    def advance_life(self):
+    def advance_life(self, parameter):
         """
-        Goes through another generation in the current world
+        Goes through a certain number of generations in the current world
+        :param parameter: This is the number of generations that the simulation should go through
         :return: None
         """
         if self.__currentWorld != None:
-            self.__currentWorld.next_generation()
+            print("Advancing Time...")
+            for times in range(0, parameter):
+                self.__currentWorld.next_generation()
+                print(self.__currentWorld)
+                if self.repetition_check():
+                    print("The world has reached a steady state.")
+                    print("Ending simulation")
+                    break
+                sleep(self.__waitTime)
         else:
             print('You have to make a world to run the next generation.')
 

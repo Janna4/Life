@@ -173,3 +173,26 @@ def print_centered(string, length=60, character=" "):
         centeredString = string[:length]
     print(centeredString)
 
+def compare_lists(list1, list2):
+    """
+    Sees if 2 lists are the same
+    :param list1: the first list
+    :param list2: the second list
+    :return: a boolean
+    """
+    #
+    # You can delete this procedure
+    #
+    same = True
+    if (len(list1)) != (len(list2)):
+        same = False
+    #
+    # The rest of thsi will not work if these lists aren't the same length
+    #
+    else:
+        for item in range(len(list1)):
+            print(list1[item])
+            print(list2[item])
+            if list1[item] != list2[item]:
+                same = False
+    return same
