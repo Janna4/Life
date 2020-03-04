@@ -140,11 +140,6 @@ class World(object):
                         cell.add_neighbor(self._gridA[row][column + 1])
                         cell.add_neighbor(self._gridA[row + 1][column])
                         cell.add_neighbor(self._gridA[row + 1][column + 1])
-                        cell.add_neighbor(self._gridA[row][self._columns - 1])
-                        cell.add_neighbor(self._gridA[row + 1][self._columns - 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][column])
-                        cell.add_neighbor(self._gridA[self._rows - 1][column + 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][self._columns - 1])
                     # 2. rest of the top row
                     elif column < (self._columns - 1):
                         #print('upper')
@@ -153,20 +148,12 @@ class World(object):
                         cell.add_neighbor(self._gridA[row + 1][column - 1])
                         cell.add_neighbor(self._gridA[row + 1][column])
                         cell.add_neighbor(self._gridA[row + 1][column + 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][column - 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][column])
-                        cell.add_neighbor(self._gridA[self._rows - 1][column + 1])
                     # upper right corner
                     else:
                         #print('upper right')
                         cell.add_neighbor(self._gridA[row][column - 1])
                         cell.add_neighbor(self._gridA[row + 1][column - 1])
                         cell.add_neighbor(self._gridA[row + 1][column])
-                        cell.add_neighbor(self._gridA[0][0])
-                        cell.add_neighbor(self._gridA[1][0])
-                        cell.add_neighbor(self._gridA[self._rows - 1][self._columns - 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][self._columns - 2])
-                        cell.add_neighbor(self._gridA[0][self._columns - 1])
                 # middle row
                 elif row < (self._rows - 1):
                     #1. middle left
@@ -177,9 +164,6 @@ class World(object):
                         cell.add_neighbor(self._gridA[row][column + 1])
                         cell.add_neighbor(self._gridA[row + 1][column])
                         cell.add_neighbor(self._gridA[row + 1][column + 1])
-                        cell.add_neighbor(self._gridA[row][self._columns - 1])
-                        cell.add_neighbor(self._gridA[row - 1][self._columns - 1])
-                        cell.add_neighbor(self._gridA[row + 1][self._columns - 1])
                     #2. the rest of the middle row (8 neighbors)
                     elif column < (self._columns - 1):
                         #print('middle')
@@ -199,9 +183,6 @@ class World(object):
                         cell.add_neighbor(self._gridA[row][column - 1])
                         cell.add_neighbor(self._gridA[row + 1][column])
                         cell.add_neighbor(self._gridA[row + 1][column - 1])
-                        cell.add_neighbor(self._gridA[row][0])
-                        cell.add_neighbor(self._gridA[row - 1][0])
-                        cell.add_neighbor(self._gridA[row + 1][0])
                 # bottom row
                 else:
                     # 1. lower left corner
@@ -210,11 +191,6 @@ class World(object):
                         cell.add_neighbor(self._gridA[row][column + 1])
                         cell.add_neighbor(self._gridA[row - 1][column])
                         cell.add_neighbor(self._gridA[row - 1][column + 1])
-                        cell.add_neighbor(self._gridA[self._rows - 2][self._columns - 1])
-                        cell.add_neighbor(self._gridA[self._rows - 1][self._columns - 1])
-                        cell.add_neighbor(self._gridA[0][0])
-                        cell.add_neighbor(self._gridA[0][1])
-                        cell.add_neighbor(self._gridA[0][self._columns - 1])
                     # 2. rest of the bottom row
                     elif column < (self._columns - 1):
                         #print('lower')
@@ -223,20 +199,12 @@ class World(object):
                         cell.add_neighbor(self._gridA[row - 1][column - 1])
                         cell.add_neighbor(self._gridA[row - 1][column])
                         cell.add_neighbor(self._gridA[row - 1][column + 1])
-                        cell.add_neighbor(self._gridA[0][column - 1])
-                        cell.add_neighbor(self._gridA[0][column])
-                        cell.add_neighbor(self._gridA[0][column + 1])
                     # lower right corner
                     else:
                         #print('lower right')
                         cell.add_neighbor(self._gridA[row][column - 1])
                         cell.add_neighbor(self._gridA[row - 1][column - 1])
                         cell.add_neighbor(self._gridA[row - 1][column])
-                        cell.add_neighbor(self._gridA[0][0])
-                        cell.add_neighbor(self._gridA[self._rows - 1][0])
-                        cell.add_neighbor(self._gridA[self._rows - 2][0])
-                        cell.add_neighbor(self._gridA[0][self._columns - 2])
-                        cell.add_neighbor(self._gridA[0][self._columns - 1])
 
     def set_cell(self, row, column, living):
         """

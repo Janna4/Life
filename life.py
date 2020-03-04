@@ -18,6 +18,7 @@ class Life(object):
     def __init__(self, rows = 5, columns = 5):
         self.__rows = rows
         self.__columns = columns
+        self.__worldType = World_Torus
         self.__currentWorld = None
         self.__percentLiving = 33
         self.__waitTime = 0
@@ -151,7 +152,8 @@ class Life(object):
                 print("Loading World...")
                 self.load_world(parameter)
                 print("Finished!")
-
+            elif command == 'geometry':
+                self.change_geometry(parameter)
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
@@ -179,7 +181,7 @@ class Life(object):
         Displays the menu for changing settings
         :return: None
         """
-        print('[S]ize   [O]dds    [Q]uickness   [D]esign   ')
+        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry')
 
     def get_command(self):
         """
@@ -225,6 +227,7 @@ class Life(object):
                     's': 'new-size',
                     'd': 'change-design',
                     'o': 'new-odds',
+                    'g': 'geometry',
                     'q': 'new-speed'}
 
         validCommands = commands.keys()
@@ -269,7 +272,7 @@ Press enter to continue""")
         :return: None
         """
         print("Creating World...")
-        w1 = World_Torus(self.__rows, self.__columns, self.__waitTime)
+        w1 = self.__worldType(self.__rows, self.__columns, self.__waitTime)
         w1.random_fill(self.__percentLiving)
         self.__currentWorld = w1
         print(w1)
@@ -401,12 +404,15 @@ Press enter to continue""")
         :return: None
         """
         #todo send in parameters and check userinput for filename legality (somewhere else)
-        #todo send these into a worlds folder
         #todo set display back to what the user had after this
         myPath = 'worlds'
+        allFiles = os.listdir('worlds')
+
         self.change_display(1)
         filename = input('What would you like to call the file you save this world in? ')
         filename += '.txt.lifeWorlds'
+        if filename in allFiles:
+            toolbox.get_boolean(f'{filename} already exists. Are you sure you want to continue? ')
         filename = os.path.join(myPath, filename)
         with open(filename, 'w') as outputFile:
             print("Writing file...")
@@ -482,6 +488,27 @@ Press enter to continue""")
 
         print("Here is the old world")
         print(self.__currentWorld)
+        
+    def change_geometry(self, geometry):
+        """
+        Changes if the user is using a torus world or a dish world
+        :param geometry: This is the type of geometry the user already said to use (can be None at this point)
+        :return: None
+        """
+        if geometry not in ['torus', 'dish']:
+            geometry = toolbox.get_string('What type of world would you like? (torus or dish) ')
+        while geometry not in ['torus', 'dish']:
+            print("You can only enter torus or dish")
+            geometry = toolbox.get_string('What type of world would you like? ')
+        print('Changing geometry...')
+        if geometry == 'torus':
+            self.__worldType = World_Torus
+            print("World type set to torus")
+        elif geometry == 'dish':
+            self.__worldType = World
+            print("World type set to dish")
+        self.create_world()
+        print("Finished!")
 
 if __name__ == "__main__":
     #lifeTest.test1()
