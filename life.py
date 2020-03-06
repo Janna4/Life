@@ -135,15 +135,15 @@ class Life(object):
                 print("Finished!")
             elif command == "display-acorn":
                 print("Displaying World...")
-                self.load_world(2, 'set_worlds')
+                self.load_world(1, 'set_worlds')
                 print("Finished!")
             elif command == "display-l":
                 print("Displaying World...")
-                self.load_world(3, 'set_worlds')
+                self.load_world(2, 'set_worlds')
                 print("Finished!")
             elif command == 'display-glider':
                 print('Loading world...')
-                self.load_world(1, 'set_worlds')
+                self.load_world(3, 'set_worlds')
                 print('Finished!')
             elif command == 'change-design':
                 print("Changing display...")

@@ -45,7 +45,7 @@ class World(object):
             string += '\n'
         dimensions = f'{self._rows} by {self._columns}'
         percentAlive = self.find_living()
-        string += (f'\nDimensions: {dimensions}    Percent Living: {percentAlive}   Generation #: {self._generationsDone}  Speed: 1 gen every {self._speed} seconds')
+        string += (f'\nDimensions: {dimensions}    Percent Living: {percentAlive}   Generation #: {self._generationsDone}  Speed: 1 gen every {self._speed} seconds   Geometry: Dish')
         return string
 
     def get_rows(self):

@@ -2,6 +2,33 @@ from world import World
 
 class World_Torus(World):
 
+    def __str__(self):
+        """Return a string that represents the current generation. For example,
+        a completely dead world (4x5) would look like this, assuming that
+        Cell.deadChar is a period:
+        .....
+        .....
+        .....
+        .....
+        A world (4x5) with one living cell would look like this, assuming
+        that Cell.liveChar is an 'X' at position self.__grid[1][3]:
+        .....
+        ...X.
+        .....
+        .....
+        Of course, you would not check on Cell.deadChar or Cell.liveChar. You
+        would rely on the cell to know how it should be printed.
+        """
+        string = ''
+        for row in self._gridA:
+            for cell in row:
+                string += cell.__str__()
+            string += '\n'
+        dimensions = f'{self._rows} by {self._columns}'
+        percentAlive = self.find_living()
+        string += (f'\nDimensions: {dimensions}    Percent Living: {percentAlive}   Generation #: {self._generationsDone}  Speed: 1 gen every {self._speed} seconds   Geometry: Torus')
+        return string
+
 
     def create_neighbors(self):
         """
