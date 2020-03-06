@@ -18,7 +18,7 @@ class Life(object):
     def __init__(self, rows = 5, columns = 5):
         self.__rows = rows
         self.__columns = columns
-        self.__worldType = World_Torus
+        self.__worldType = World
         self.__currentWorld = None
         self.__percentLiving = 33
         self.__waitTime = 0
@@ -135,12 +135,16 @@ class Life(object):
                 print("Finished!")
             elif command == "display-acorn":
                 print("Displaying World...")
-                self.display_acorn()
+                self.load_world(2, 'set_worlds')
                 print("Finished!")
             elif command == "display-l":
                 print("Displaying World...")
-                self.long_l_world()
+                self.load_world(3, 'set_worlds')
                 print("Finished!")
+            elif command == 'display-glider':
+                print('Loading world...')
+                self.load_world(1, 'set_worlds')
+                print('Finished!')
             elif command == 'change-design':
                 print("Changing display...")
                 self.change_display(parameter)
@@ -150,13 +154,16 @@ class Life(object):
                 self.save_world()
             elif command == 'load-world':
                 print("Loading World...")
-                self.load_world(parameter)
+                self.load_world(parameter, 'worlds')
                 print("Finished!")
             elif command == 'geometry':
                 self.change_geometry(parameter)
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
+            elif command == 'interesting-worlds':
+                self.show_worlds_menu()
+                command = self.get_worlds_command()
             else:
                 self.show_menu()
                 command, parameter = self.get_command()
@@ -174,7 +181,7 @@ class Life(object):
         Displays the menu.
         :return: None
         """
-        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  Display: Aco[r]n    [L]ong L')
+        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  [I]nteresting Worlds')
 
     def show_settings_menu(self):
         """
@@ -183,10 +190,36 @@ class Life(object):
         """
         print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry')
 
+    def show_worlds_menu(self):
+        """
+        Displays the menu for pre-set worlds
+        :return: None
+        """
+        print("[A]corn  [L]ong L    [G]lider")
+
+    def get_worlds_command(self):
+        """
+        Gets a command from the user based on what world the user would like
+        :return: the command name
+        """
+        commands = {'?': 'help',
+                    'h': 'help',
+                    'a': 'display-acorn',
+                    'l': 'display-l',
+                    'g': 'display-glider'}
+
+        validCommands = commands.keys()
+
+        userInput = '&'
+        while userInput[0].lower() not in validCommands:
+            userInput = input(' ')
+        command = commands[userInput[0].lower()]
+        return command
+
     def get_command(self):
         """
         Gets a valid command from the user.
-        :return: the name of the chosen command and any extra information the prgram should know for running the command
+        :return: the name of the chosen command and any extra information the program should know for running the command
         """
 
         commands = {'?': 'help',
@@ -195,11 +228,10 @@ class Life(object):
                     'a': 'advance-life',
                     ' ': 'advance-life',
                     'f': 'fast-forward',
-                    'r': 'display-acorn',
-                    'l': 'display-l',
                     's': 'settings',
                     'p': 'save-world',
                     '#': 'load-world',
+                    'i': 'interesting-worlds',
                     'q':'quit'}
 
         validCommands = commands.keys()
@@ -338,66 +370,6 @@ Press enter to continue""")
             Cell.set_display(setString)
         print(self.__currentWorld)
 
-    def display_acorn(self):
-        """
-        Create a blank world and put this pattern in the middle:
-         .........
-         ..x......
-         ....x....
-         .xx..xxx.
-         .........
-        :return: None
-        """
-        #todo this and l will not work right with too small o world
-        if self.__rows < 8:
-            self.__rows = 8
-        if self.__columns < 11:
-            self.__columns = 11
-        rows = self.__rows
-        columns = self.__rows
-        self.__currentWorld = World(rows, columns, self.__waitTime)
-
-        middleRow = int(rows / 2)
-        middleColumn = int(columns / 2)
-
-        self.__currentWorld.set_cell(middleRow - 1, middleColumn - 2, True)
-        self.__currentWorld.set_cell(middleRow - 0, middleColumn - 0, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn - 3, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn - 2, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 1, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 2, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 3, True)
-        print(self.__currentWorld)
-
-    def long_l_world(self):
-        """
-        Create a blank world and put this pattern in the middle:
-        ....
-        .x..
-        .x..
-        .x..
-        .xx.
-        ....
-        :return: None
-        """
-        if self.__rows < 7:
-            self.__rows = 7
-        if self.__rows < 6:
-            self.__columns = 6
-        rows = self.__rows
-        columns = self.__rows
-        self.__currentWorld = World(rows, columns, self.__waitTime)
-
-        middleRow = int(rows / 2)
-        middleColumn = int(columns / 2)
-
-        self.__currentWorld.set_cell(middleRow - 2, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow - 1, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow - 0, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 1, True)
-        print(self.__currentWorld)
-
     def save_world(self):
         """
         Saves a world into a file.
@@ -423,27 +395,28 @@ Press enter to continue""")
         self.__pastWorlds.append(filename)
         print("Done saving", filename)
 
-    def load_world(self, fileNumber):
+    def load_world(self, fileNumber, directory):
         """
         Opens a world previously saved in this program.
         :param fileNumber: this is the number of the file the user wants to open
+        :param directory: this is the place where the file is stored
         :return: None
         """
         #
         #todo there a re probabaly better ways to do this
         #
         numberOfFiles = 0
-        allFiles = os.listdir('worlds')
+        allFiles = os.listdir(directory)
         for file in allFiles:
             numberOfFiles += 1
 
         if toolbox.is_integer(fileNumber):
             fileNumber = int(fileNumber)
-            if 0 < fileNumber <= numberOfFiles:
+            if not 0 < fileNumber <= numberOfFiles:
                 print("This file does not exist")
                 print("selecting default file...")
                 print()
-                fileNumber = 1
+                fileNumber = 0
         else:
             counter = 1
             for file in allFiles:
@@ -458,7 +431,7 @@ Press enter to continue""")
 
         filename = allFiles[fileNumber - 1]
 
-        filename = os.path.join('worlds', filename)
+        filename = os.path.join(directory, filename)
 
         #
         # Finds the old worlds size for consistency
@@ -473,7 +446,7 @@ Press enter to continue""")
                     columns += 1
 
         columns -= 1
-        self.__currentWorld = World(rows, columns, self.__waitTime)
+        self.__currentWorld = self.__worldType(rows, columns, self.__waitTime)
 
         columnNumber = 0
         rowNumber = 0
