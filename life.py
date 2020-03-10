@@ -137,6 +137,10 @@ class Life(object):
                 print("Displaying World...")
                 self.load_world(1, 'set_worlds')
                 print("Finished!")
+            elif command == "display-gliderGun":
+                print("Displaying World...")
+                self.load_world(4, 'set_worlds')
+                print("Finished!")
             elif command == "display-l":
                 print("Displaying World...")
                 self.load_world(2, 'set_worlds')
@@ -199,7 +203,7 @@ class Life(object):
         Displays the menu for pre-set worlds
         :return: None
         """
-        print("[A]corn  [L]ong L    [G]lider")
+        print("[A]corn  [L]ong L    [G]lider    [F]ake Glider Gun")
 
     def get_worlds_command(self):
         """
@@ -210,7 +214,8 @@ class Life(object):
                     'h': 'help',
                     'a': 'display-acorn',
                     'l': 'display-l',
-                    'g': 'display-glider'}
+                    'g': 'display-glider',
+                    'f': "display-gliderGun"}
 
         validCommands = commands.keys()
 
@@ -346,28 +351,41 @@ Press enter to continue""")
                 pass
             numberOfSets = number + 2
         else:
-            print('**************************************')
+            print('*'*80)
             for number, set in enumerate(World.rules):
-                liveNeeds = World.rules[set]['liveNeeds']
-                birthNeeds = World.rules[set]['birthNeeds']
-                print(f'{number + 1}: Neighbors needed to survive: {liveNeeds} Neighbors needed for birth: {birthNeeds}')
+                liveRules = ''
+                for character in World.rules[set]['liveNeeds']:
+                    liveRules += character
+                    if character != World.rules[set]['liveNeeds'][-1]:
+                        liveRules += ' or '
+                comeAliveRules = ''
+                for character in World.rules[set]['birthNeeds']:
+                    comeAliveRules += character
+                    if character != World.rules[set]['birthNeeds'][-1]:
+                        comeAliveRules += ' or '
+                stringPt1 = f'{number + 1}. Neighbors needed to survive: {liveRules}'
+                stringPt2 = f'Neighbors needed for birth: {comeAliveRules}'
+                print(f'{stringPt1:<39} {stringPt2:>39}')
             print(f'{number + 2}: Choose your own set')
-            print('**************************************')
+            print('*'*80)
             prompt = 'What character set would you like to use?'
             setNumber = toolbox.get_integer_between(1, number + 2, prompt)
             numberOfSets = number + 2
 
         if setNumber == (numberOfSets):
-            #liveChar = input("What would you like the live cells to look like? ")
-            #while liveChar == None:
-             #   print("The living cells cannot be nothing")
-              #  liveChar = input("What would you like the live cells to look like? ")
-            #deadChar = input("What would you like the dead cells to look like? ")
-            #while deadChar == None:
-             #   print("The dead cells cannot be nothing")
-              #  deadChar = input("What would you like the dead cells to look like? ")
-            #Cell.set_display('choice', liveChar, deadChar)
-            print('Sorry, this option is currently unavailable')
+            liveNeeds = ''
+            birthNeeds = ''
+            addMore = True
+            while addMore == True:
+                liveNeeds += str(toolbox.get_integer_between(0, 9, "How many neighbors will cells need to live?"))
+                addMore = toolbox.get_boolean("Would you like to add anymore rules for cells to stay alive? ")
+            print()
+            addMore = True
+            while addMore == True:
+                birthNeeds += str(toolbox.get_integer_between(0, 9, "How many neighbors will dead cells need to come to life?"))
+                addMore = toolbox.get_boolean("Would you like to add anymore rules for cells to come alive? ")
+            print()
+            World.set_rules('choice', liveNeeds, birthNeeds)
         else:
             setString = list(World.rules.keys())[setNumber - 1]
             World.set_rules(setString)

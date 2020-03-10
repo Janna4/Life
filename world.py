@@ -23,7 +23,7 @@ class World(object):
 
 
     @classmethod
-    def set_rules(cls, rules):
+    def set_rules(cls, rules, liveNeeds = None, birthNeeds = None):
         """
         Changes the way next generation works
         :param rules: this is a string holding the new rules
@@ -34,6 +34,10 @@ class World(object):
             cls.rule = rules
             cls.liveNeeds = cls.rules[rules]['liveNeeds']
             cls.birthNeeds = cls.rules[rules]['birthNeeds']
+        elif rules == "choice":
+            cls.rule = None
+            cls.liveNeeds = str(liveNeeds)
+            cls.birthNeeds = str(birthNeeds)
         else:
             raise ValueError(f'DisplaySet must be in {legalValues}.')
 
