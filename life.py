@@ -7,28 +7,23 @@ Updated: 2/20/2020
 
 from cell import Cell
 from world import World
+from world_torus import World_Torus
 import toolbox
 import lifeTest
 from time import sleep
+import os
 
 class Life(object):
 
     def __init__(self, rows = 5, columns = 5):
         self.__rows = rows
         self.__columns = columns
+        self.__worldType = World
         self.__currentWorld = None
         self.__percentLiving = 33
         self.__waitTime = 0
         self.__pastWorlds = []
         self.main()
-
-    #def add_past_worlds(self):
-    #    """
-     #   Adds all worlds saved from the past into the list of past worlds
-      #  :return: None
-       # """
-        #for file in .\worlds:
-
 
     def __str__(self):
         pass
@@ -114,20 +109,11 @@ class Life(object):
                 self.new_size(parameter)
                 print("Finished!")
             elif command == "advance-life":
-                if parameter != None:
+                if parameter != None and toolbox.is_integer(parameter):
                     parameter = int(parameter)
                 else:
                     parameter = 1
-                    print("Advancing Time...")
-                for times in range(0, parameter):
-                    self.advance_life()
-                    print(self.__currentWorld)
-                    sleep(self.__waitTime)
-                print("Finished!")
-            elif command == "sim-1-generation":
-                print("Advancing Time...")
-                self.advance_life()
-                print(self.__currentWorld)
+                self.advance_life(parameter)
                 print("Finished!")
             elif command == "new-odds":
                 self.change_living_odds(parameter)
@@ -149,12 +135,16 @@ class Life(object):
                 print("Finished!")
             elif command == "display-acorn":
                 print("Displaying World...")
-                self.display_acorn()
+                self.load_world(1, 'set_worlds')
                 print("Finished!")
             elif command == "display-l":
                 print("Displaying World...")
-                self.long_l_world()
+                self.load_world(2, 'set_worlds')
                 print("Finished!")
+            elif command == 'display-glider':
+                print('Loading world...')
+                self.load_world(3, 'set_worlds')
+                print('Finished!')
             elif command == 'change-design':
                 print("Changing display...")
                 self.change_display(parameter)
@@ -164,47 +154,84 @@ class Life(object):
                 self.save_world()
             elif command == 'load-world':
                 print("Loading World...")
-                self.load_world(parameter)
+                self.load_world(parameter, 'worlds')
                 print("Finished!")
-
+            elif command == 'geometry':
+                self.change_geometry(parameter)
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
+            elif command == 'interesting-worlds':
+                self.show_worlds_menu()
+                command = self.get_worlds_command()
             else:
                 self.show_menu()
                 command, parameter = self.get_command()
+
+    def repetition_check(self):
+        """
+        Check to see if the simulation has stopped changing
+        :return: a boolean
+        """
+        repetition = self.__currentWorld.repetition_check()
+        return repetition
 
     def show_menu(self):
         """
         Displays the menu.
         :return: None
         """
-        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  Display: Aco[r]n    [L]ong L')
+        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  [I]nteresting Worlds')
 
     def show_settings_menu(self):
         """
         Displays the menu for changing settings
         :return: None
         """
-        print('[S]ize   [O]dds    [Q]uickness   [D]esign   ')
+        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry')
+
+    def show_worlds_menu(self):
+        """
+        Displays the menu for pre-set worlds
+        :return: None
+        """
+        print("[A]corn  [L]ong L    [G]lider")
+
+    def get_worlds_command(self):
+        """
+        Gets a command from the user based on what world the user would like
+        :return: the command name
+        """
+        commands = {'?': 'help',
+                    'h': 'help',
+                    'a': 'display-acorn',
+                    'l': 'display-l',
+                    'g': 'display-glider'}
+
+        validCommands = commands.keys()
+
+        userInput = '&'
+        while userInput[0].lower() not in validCommands:
+            userInput = input(' ')
+        command = commands[userInput[0].lower()]
+        return command
 
     def get_command(self):
         """
         Gets a valid command from the user.
-        :return: the name of the chosen command and any extra information the prgram should know for running the command
+        :return: the name of the chosen command and any extra information the program should know for running the command
         """
 
         commands = {'?': 'help',
                     'h': 'help',
                     'c': 'create-world',
                     'a': 'advance-life',
-                    ' ': 'sim-1-generation',
+                    ' ': 'advance-life',
                     'f': 'fast-forward',
-                    'r': 'display-acorn',
-                    'l': 'display-l',
                     's': 'settings',
                     'p': 'save-world',
                     '#': 'load-world',
+                    'i': 'interesting-worlds',
                     'q':'quit'}
 
         validCommands = commands.keys()
@@ -232,6 +259,7 @@ class Life(object):
                     's': 'new-size',
                     'd': 'change-design',
                     'o': 'new-odds',
+                    'g': 'geometry',
                     'q': 'new-speed'}
 
         validCommands = commands.keys()
@@ -276,18 +304,27 @@ Press enter to continue""")
         :return: None
         """
         print("Creating World...")
-        w1 = World(self.__rows, self.__columns, self.__waitTime)
+        w1 = self.__worldType(self.__rows, self.__columns, self.__waitTime)
         w1.random_fill(self.__percentLiving)
         self.__currentWorld = w1
         print(w1)
 
-    def advance_life(self):
+    def advance_life(self, parameter):
         """
-        Goes through another generation in the current world
+        Goes through a certain number of generations in the current world
+        :param parameter: This is the number of generations that the simulation should go through
         :return: None
         """
         if self.__currentWorld != None:
-            self.__currentWorld.next_generation()
+            print("Advancing Time...")
+            for times in range(0, parameter):
+                self.__currentWorld.next_generation()
+                print(self.__currentWorld)
+                if self.repetition_check():
+                    print("The world has reached a steady state.")
+                    print("Ending simulation")
+                    break
+                sleep(self.__waitTime)
         else:
             print('You have to make a world to run the next generation.')
 
@@ -333,77 +370,22 @@ Press enter to continue""")
             Cell.set_display(setString)
         print(self.__currentWorld)
 
-    def display_acorn(self):
-        """
-        Create a blank world and put this pattern in the middle:
-         .........
-         ..x......
-         ....x....
-         .xx..xxx.
-         .........
-        :return: None
-        """
-        #todo this and l will not work right with too small o world
-        if self.__rows < 8:
-            self.__rows = 8
-        if self.__columns < 11:
-            self.__columns = 11
-        rows = self.__rows
-        columns = self.__rows
-        self.__currentWorld = World(rows, columns, self.__waitTime)
-
-        middleRow = int(rows / 2)
-        middleColumn = int(columns / 2)
-
-        self.__currentWorld.set_cell(middleRow - 1, middleColumn - 2, True)
-        self.__currentWorld.set_cell(middleRow - 0, middleColumn - 0, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn - 3, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn - 2, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 1, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 2, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 3, True)
-        print(self.__currentWorld)
-
-    def long_l_world(self):
-        """
-        Create a blank world and put this pattern in the middle:
-        ....
-        .x..
-        .x..
-        .x..
-        .xx.
-        ....
-        :return: None
-        """
-        if self.__rows < 7:
-            self.__rows = 7
-        if self.__rows < 6:
-            self.__columns = 6
-        rows = self.__rows
-        columns = self.__rows
-        self.__currentWorld = World(rows, columns, self.__waitTime)
-
-        middleRow = int(rows / 2)
-        middleColumn = int(columns / 2)
-
-        self.__currentWorld.set_cell(middleRow - 2, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow - 1, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow - 0, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn, True)
-        self.__currentWorld.set_cell(middleRow + 1, middleColumn + 1, True)
-        print(self.__currentWorld)
-
     def save_world(self):
         """
         Saves a world into a file.
         :return: None
         """
         #todo send in parameters and check userinput for filename legality (somewhere else)
-        #todo send these into a worlds folder
         #todo set display back to what the user had after this
+        myPath = 'worlds'
+        allFiles = os.listdir('worlds')
+
         self.change_display(1)
         filename = input('What would you like to call the file you save this world in? ')
         filename += '.txt.lifeWorlds'
+        if filename in allFiles:
+            toolbox.get_boolean(f'{filename} already exists. Are you sure you want to continue? ')
+        filename = os.path.join(myPath, filename)
         with open(filename, 'w') as outputFile:
             print("Writing file...")
             for row in self.__currentWorld.get_grid():
@@ -413,23 +395,44 @@ Press enter to continue""")
         self.__pastWorlds.append(filename)
         print("Done saving", filename)
 
-    def load_world(self, fileNumber):
+    def load_world(self, fileNumber, directory):
         """
         Opens a world previously saved in this program.
         :param fileNumber: this is the number of the file the user wants to open
+        :param directory: this is the place where the file is stored
         :return: None
         """
+        #
+        #todo there a re probabaly better ways to do this
+        #
+        numberOfFiles = 0
+        allFiles = os.listdir(directory)
+        for file in allFiles:
+            numberOfFiles += 1
+
         if toolbox.is_integer(fileNumber):
             fileNumber = int(fileNumber)
-        counter = 1
-        for file in self.__pastWorlds:
-            print(counter, file)
+            if not 0 < fileNumber <= numberOfFiles:
+                print("This file does not exist")
+                print("selecting default file...")
+                print()
+                fileNumber = 0
+        else:
+            counter = 1
+            for file in allFiles:
+                print(counter, file)
+                counter +=1
 
-        while fileNumber > counter:
-            print(f"File number must be between 1 and {counter}")
             fileNumber = toolbox.get_integer("Which file would you like to open? ")
 
-        filename = self.__pastWorlds[fileNumber - 1]
+            while fileNumber > numberOfFiles:
+                print(f"File number must be between 1 and {numberOfFiles}")
+                fileNumber = toolbox.get_integer("Which file would you like to open? ")
+
+        filename = allFiles[fileNumber - 1]
+
+        filename = os.path.join(directory, filename)
+
         #
         # Finds the old worlds size for consistency
         #
@@ -443,21 +446,42 @@ Press enter to continue""")
                     columns += 1
 
         columns -= 1
-        self.__currentWorld = World(rows, columns, self.__waitTime)
+        self.__currentWorld = self.__worldType(rows, columns, self.__waitTime)
 
         columnNumber = 0
         rowNumber = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
-                rowNumber += 1
                 for cell in row:
-                    columnNumber += 1
                     if cell == 'O':
-                        self.__currentWorld.set_cell(rowNumber, columnNumber - 1, True)
+                        self.__currentWorld.set_cell(rowNumber, columnNumber, True)
+                    columnNumber += 1
+                rowNumber += 1
                 columnNumber = 0
 
         print("Here is the old world")
         print(self.__currentWorld)
+        
+    def change_geometry(self, geometry):
+        """
+        Changes if the user is using a torus world or a dish world
+        :param geometry: This is the type of geometry the user already said to use (can be None at this point)
+        :return: None
+        """
+        if geometry not in ['torus', 'dish']:
+            geometry = toolbox.get_string('What type of world would you like? (torus or dish) ')
+        while geometry not in ['torus', 'dish']:
+            print("You can only enter torus or dish")
+            geometry = toolbox.get_string('What type of world would you like? ')
+        print('Changing geometry...')
+        if geometry == 'torus':
+            self.__worldType = World_Torus
+            print("World type set to torus")
+        elif geometry == 'dish':
+            self.__worldType = World
+            print("World type set to dish")
+        self.create_world()
+        print("Finished!")
 
 if __name__ == "__main__":
     #lifeTest.test1()
