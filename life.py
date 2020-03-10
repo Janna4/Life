@@ -158,6 +158,10 @@ class Life(object):
                 print("Finished!")
             elif command == 'geometry':
                 self.change_geometry(parameter)
+            elif command == 'change-rules':
+                print('Changing rules...')
+                self.change_rules(parameter)
+                print('Finished!')
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
@@ -188,7 +192,7 @@ class Life(object):
         Displays the menu for changing settings
         :return: None
         """
-        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry')
+        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry   [R]ules')
 
     def show_worlds_menu(self):
         """
@@ -260,6 +264,7 @@ class Life(object):
                     'd': 'change-design',
                     'o': 'new-odds',
                     'g': 'geometry',
+                    'r': 'change-rules',
                     'q': 'new-speed'}
 
         validCommands = commands.keys()
@@ -328,6 +333,45 @@ Press enter to continue""")
         else:
             print('You have to make a world to run the next generation.')
 
+    def change_rules(self, parameter):
+        """
+        Changes the way next generation decides which cells die and which cells come to life
+        :param parameter: This is any extra information that the user sent into this command
+        :return: None
+        """
+        if toolbox.is_integer(parameter) and \
+                1 <= int(parameter) <= (len(World.rules.keys()) + 1):
+            setNumber = int(parameter)
+            for number, set in enumerate(World.rules):
+                pass
+            numberOfSets = number + 2
+        else:
+            print('**************************************')
+            for number, set in enumerate(World.rules):
+                liveNeeds = World.rules[set]['liveNeeds']
+                birthNeeds = World.rules[set]['birthNeeds']
+                print(f'{number + 1}: Neighbors needed to survive: {liveNeeds} Neighbors needed for birth: {birthNeeds}')
+            print(f'{number + 2}: Choose your own set')
+            print('**************************************')
+            prompt = 'What character set would you like to use?'
+            setNumber = toolbox.get_integer_between(1, number + 2, prompt)
+            numberOfSets = number + 2
+
+        if setNumber == (numberOfSets):
+            #liveChar = input("What would you like the live cells to look like? ")
+            #while liveChar == None:
+             #   print("The living cells cannot be nothing")
+              #  liveChar = input("What would you like the live cells to look like? ")
+            #deadChar = input("What would you like the dead cells to look like? ")
+            #while deadChar == None:
+             #   print("The dead cells cannot be nothing")
+              #  deadChar = input("What would you like the dead cells to look like? ")
+            #Cell.set_display('choice', liveChar, deadChar)
+            print('Sorry, this option is currently unavailable')
+        else:
+            setString = list(World.rules.keys())[setNumber - 1]
+            World.set_rules(setString)
+
     def change_display(self, parameter):
         """
         Change the live and dead characters for the cells.
@@ -353,9 +397,6 @@ Press enter to continue""")
             numberOfSets = number + 2
 
         if setNumber == (numberOfSets):
-            #
-            #todo doesnt work with unicode characters
-            #
             liveChar = input("What would you like the live cells to look like? ")
             while liveChar == None:
                 print("The living cells cannot be nothing")
