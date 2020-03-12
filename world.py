@@ -104,6 +104,9 @@ Speed: 1 gen every {self._speed} seconds    Rules: Cells live with {liveNeeds} n
     def get_grid(self):
         return self._gridA
 
+    def get_pastGrid(self):
+        return self._gridB
+
     def set_speed(self, seconds):
         self._speed = seconds
 
@@ -305,3 +308,13 @@ Speed: 1 gen every {self._speed} seconds    Rules: Cells live with {liveNeeds} n
         if str(self._gridA) == str(self._gridD):
             repetition = True
         return repetition
+
+    def rewind(self):
+        """
+        Cycles all the grids back 1 generation (and sets the farthest back generation to None)
+        :return: None
+        """
+        self._gridA = self._gridB
+        self._gridB = self._gridC
+        self._gridC = self._gridD
+        self._gridD = None

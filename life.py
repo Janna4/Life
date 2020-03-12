@@ -21,7 +21,7 @@ class Life(object):
         self.__worldType = World
         self.__currentWorld = None
         self.__percentLiving = 33
-        self.__waitTime = 0
+        self.__waitTime = 0.5
         self.__pastWorlds = []
         self.main()
 
@@ -162,6 +162,8 @@ class Life(object):
                 print("Finished!")
             elif command == 'geometry':
                 self.change_geometry(parameter)
+            elif command == 'back-1gen':
+                self.rewind()
             elif command == 'change-rules':
                 print('Changing rules...')
                 self.change_rules(parameter)
@@ -189,7 +191,7 @@ class Life(object):
         Displays the menu.
         :return: None
         """
-        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  [I]nteresting Worlds')
+        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [I]nteresting Worlds    [B]ack one gen  [Q]uit')
 
     def show_settings_menu(self):
         """
@@ -203,7 +205,7 @@ class Life(object):
         Displays the menu for pre-set worlds
         :return: None
         """
-        print("[A]corn  [L]ong L    [G]lider    [F]ake Glider Gun")
+        print("[A]corn  [L]ong L    [G]lider    [P]ew Pew Glider Gun   [B]ack")
 
     def get_worlds_command(self):
         """
@@ -215,11 +217,17 @@ class Life(object):
                     'a': 'display-acorn',
                     'l': 'display-l',
                     'g': 'display-glider',
-                    'f': "display-gliderGun"}
+                    'p': "display-gliderGun",
+                    'b': 'thisJustGoesToTheMainMenu'}
 
         validCommands = commands.keys()
 
         userInput = '&'
+        #
+        #todo no workeee
+        #
+        if len(userInput) < 1:
+            userInput = 'b'
         while userInput[0].lower() not in validCommands:
             userInput = input(' ')
         command = commands[userInput[0].lower()]
@@ -241,6 +249,7 @@ class Life(object):
                     'p': 'save-world',
                     '#': 'load-world',
                     'i': 'interesting-worlds',
+                    'b': 'back-1gen',
                     'q':'quit'}
 
         validCommands = commands.keys()
@@ -325,15 +334,18 @@ Press enter to continue""")
         :param parameter: This is the number of generations that the simulation should go through
         :return: None
         """
+        doCheck = True
         if self.__currentWorld != None:
             print("Advancing Time...")
             for times in range(0, parameter):
                 self.__currentWorld.next_generation()
                 print(self.__currentWorld)
-                if self.repetition_check():
+                if doCheck and self.repetition_check() and (parameter - times) > 1:
                     print("The world has reached a steady state.")
-                    print("Ending simulation")
-                    break
+                    doCheck = toolbox.get_boolean("Would you like to end the simulation? ")
+                    if doCheck:
+                        print("Ending simulation")
+                        break
                 sleep(self.__waitTime)
         else:
             print('You have to make a world to run the next generation.')
@@ -495,25 +507,39 @@ Press enter to continue""")
         #
         # Finds the old worlds size for consistency
         #
-        rows = 0
-        columns = 0
+        originalRows = 0
+        originalColumns = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
-                columns = 0
-                rows += 1
+                originalColumns = 0
+                originalRows += 1
                 for cell in row:
-                    columns += 1
-
-        columns -= 1
+                    originalColumns += 1
+        #
+        # The loop counted 1 more column than there actually is since the code counts from 0
+        # but the loop counted from 1
+        #
+        originalColumns -= 1
+        if originalRows < self.__rows:
+            rows = self.__rows
+        else:
+            rows = originalRows
+        if originalColumns < self.__columns:
+            columns = self.__columns
+        else:
+            columns = originalColumns
         self.__currentWorld = self.__worldType(rows, columns, self.__waitTime)
-
+        rowShift = round((rows-originalRows)/2)
+        columnShift = round((columns-originalColumns)/2)
         columnNumber = 0
         rowNumber = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
                 for cell in row:
                     if cell == 'O':
-                        self.__currentWorld.set_cell(rowNumber, columnNumber, True)
+                        centeredRowNumber = int(rowNumber+rowShift)
+                        centeredColumnNumber = int(columnNumber+columnShift)
+                        self.__currentWorld.set_cell(centeredRowNumber, centeredColumnNumber, True)
                     columnNumber += 1
                 rowNumber += 1
                 columnNumber = 0
@@ -541,6 +567,19 @@ Press enter to continue""")
             print("World type set to dish")
         self.create_world()
         print("Finished!")
+
+    def rewind(self):
+        """
+        Sets the current world back one generation
+        :return: None
+        """
+        print('Finding grid...')
+        if self.__currentWorld.get_pastGrid() != None:
+            self.__currentWorld.rewind()
+            print(self.__currentWorld)
+        else:
+            print("You have to have more than one generation for this command to work.")
+        print('Finished going back 1 generation!')
 
 if __name__ == "__main__":
     #lifeTest.test1()
