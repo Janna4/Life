@@ -168,6 +168,10 @@ class Life(object):
                 print('Changing rules...')
                 self.change_rules(parameter)
                 print('Finished!')
+            elif command == 'display-snake':
+                print("Displaying World...")
+                self.load_world(5, 'set_worlds')
+                print("Finished!")
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
@@ -218,6 +222,7 @@ class Life(object):
                     'l': 'display-l',
                     'g': 'display-glider',
                     'p': "display-gliderGun",
+                    's': "display-snake",
                     'b': 'thisJustGoesToTheMainMenu'}
 
         validCommands = commands.keys()

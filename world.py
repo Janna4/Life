@@ -12,7 +12,8 @@ class World(object):
 
     rules = {'Default Rules': {'liveNeeds': '23', 'birthNeeds': '3'},
              'Loner': {'liveNeeds': '0', 'birthNeeds': '3'},
-             'Perma Death': {'liveNeeds': '23', 'birthNeeds': '9'}}
+             'Perma Death': {'liveNeeds': '23', 'birthNeeds': '9'},
+             'diamond': {'liveNeeds': '0', 'birthNeeds': '23'}}
 
 
     rule = 'Default Rules'
