@@ -10,6 +10,7 @@ class Cell(object):
                    'squares': {'liveChar': '\u2B1B', 'deadChar': '\u2B1C'},
                    'soccer': {'liveChar': '\u26BD', 'deadChar': '\u2B1C'},
                    'at sign': {'liveChar': '@', 'deadChar': ' '},
+                   'stars': {'liveChar': '\u272D', 'deadChar': ' '},
                    'circles': {'liveChar': '\u26AB', 'deadChar': '\u26AA'} }
 
     displaySet = 'basic'

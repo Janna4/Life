@@ -98,7 +98,7 @@ def get_positive_number(prompt):
 
 
 def get_integer_between(low, high, prompt="Enter an integer:"):
-    prompt += " (" + str(low) + "-" + str(high) + ")"
+    prompt += " (" + str(low) + "-" + str(high) + ") "
     number = get_integer(prompt)
     while (number < low) or (number > high):
         number = get_integer(prompt)

@@ -10,6 +10,38 @@ import toolbox
 
 class World(object):
 
+    rules = {'Default Rules': {'liveNeeds': '23', 'birthNeeds': '3'},
+             'Loner': {'liveNeeds': '0', 'birthNeeds': '3'},
+             'Perma Death': {'liveNeeds': '23', 'birthNeeds': '9'},
+             'diamond': {'liveNeeds': '0', 'birthNeeds': '23'}}
+
+
+    rule = 'Default Rules'
+
+    liveNeeds = rules[rule]['liveNeeds']
+    birthNeeds = rules[rule]['birthNeeds']
+
+
+
+    @classmethod
+    def set_rules(cls, rules, liveNeeds = None, birthNeeds = None):
+        """
+        Changes the way next generation works
+        :param rules: this is a string holding the new rules
+        :return: None
+        """
+        legalValues = cls.rules.keys()
+        if rules in legalValues:
+            cls.rule = rules
+            cls.liveNeeds = cls.rules[rules]['liveNeeds']
+            cls.birthNeeds = cls.rules[rules]['birthNeeds']
+        elif rules == "choice":
+            cls.rule = None
+            cls.liveNeeds = str(liveNeeds)
+            cls.birthNeeds = str(birthNeeds)
+        else:
+            raise ValueError(f'DisplaySet must be in {legalValues}.')
+
     def __init__(self, rows, columns, speed):
         self._rows = rows
         self._columns = columns
@@ -19,6 +51,7 @@ class World(object):
         self._gridD = None
         self._generationsDone = 1
         self._speed = speed
+        self._rules = '23-3'
         self.create_neighbors()
 
     def __str__(self):
@@ -45,7 +78,22 @@ class World(object):
             string += '\n'
         dimensions = f'{self._rows} by {self._columns}'
         percentAlive = self.find_living()
-        string += (f'\nDimensions: {dimensions}    Percent Living: {percentAlive}   Generation #: {self._generationsDone}  Speed: 1 gen every {self._speed} seconds   Geometry: Dish')
+        liveNeeds = ''
+        birthNeeds = ''
+        #
+        # Puts the rules into a more readable format
+        #
+        rules = self._rules.split('-')
+        for number in rules[0]:
+            liveNeeds += number
+            if number != rules[0][-1]:
+                liveNeeds += ' or '
+        for number in rules[1]:
+            birthNeeds += number
+            if number != rules[1][-1]:
+                birthNeeds += ' or '
+        string += (f'''\nDimensions: {dimensions}    Percent Living: {percentAlive}   Generation #: {self._generationsDone}   Geometry: Dish    
+Speed: 1 gen every {self._speed} seconds    Rules: Cells live with {liveNeeds} neighbors and cells are born with {birthNeeds} neighbors''')
         return string
 
     def get_rows(self):
@@ -56,6 +104,9 @@ class World(object):
 
     def get_grid(self):
         return self._gridA
+
+    def get_pastGrid(self):
+        return self._gridB
 
     def set_speed(self, seconds):
         self._speed = seconds
@@ -224,13 +275,19 @@ class World(object):
         :return: None
         """
         newGrid = self.create_grid()
+        liveRules = ''
+        for character in World.liveNeeds:
+            liveRules += character
+        comeAliveRules = ''
+        for character in World.birthNeeds:
+            comeAliveRules += character
         for row in self._gridA:
             for cell in row:
                 if cell.get_living() == True:
-                    if cell.living_neighbors() in [2, 3]:
+                    if str(cell.living_neighbors()) in liveRules:
                         newGrid[cell.get_row()][cell.get_column()].set_living(True)
                 else:
-                    if cell.living_neighbors() == 3:
+                    if str(cell.living_neighbors()) in comeAliveRules:
                         newGrid[cell.get_row()][cell.get_column()].set_living(True)
         self._gridD = self._gridC
         self._gridC = self._gridB
@@ -252,3 +309,13 @@ class World(object):
         if str(self._gridA) == str(self._gridD):
             repetition = True
         return repetition
+
+    def rewind(self):
+        """
+        Cycles all the grids back 1 generation (and sets the farthest back generation to None)
+        :return: None
+        """
+        self._gridA = self._gridB
+        self._gridB = self._gridC
+        self._gridC = self._gridD
+        self._gridD = None

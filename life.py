@@ -21,7 +21,7 @@ class Life(object):
         self.__worldType = World
         self.__currentWorld = None
         self.__percentLiving = 33
-        self.__waitTime = 0
+        self.__waitTime = 0.5
         self.__pastWorlds = []
         self.main()
 
@@ -137,6 +137,10 @@ class Life(object):
                 print("Displaying World...")
                 self.load_world(1, 'set_worlds')
                 print("Finished!")
+            elif command == "display-gliderGun":
+                print("Displaying World...")
+                self.load_world(4, 'set_worlds')
+                print("Finished!")
             elif command == "display-l":
                 print("Displaying World...")
                 self.load_world(2, 'set_worlds')
@@ -158,6 +162,16 @@ class Life(object):
                 print("Finished!")
             elif command == 'geometry':
                 self.change_geometry(parameter)
+            elif command == 'back-1gen':
+                self.rewind()
+            elif command == 'change-rules':
+                print('Changing rules...')
+                self.change_rules(parameter)
+                print('Finished!')
+            elif command == 'display-snake':
+                print("Displaying World...")
+                self.load_world(5, 'set_worlds')
+                print("Finished!")
             if command == 'settings':
                 self.show_settings_menu()
                 command, parameter = self.get_setting_command()
@@ -181,21 +195,21 @@ class Life(object):
         Displays the menu.
         :return: None
         """
-        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [Q]uit  [I]nteresting Worlds')
+        print('[H]elp   [C]reate World  [A]dvance Life  [F]ast-forward  [P] Save World  [#] Load world  [S]ettings  [I]nteresting Worlds    [B]ack one gen  [Q]uit')
 
     def show_settings_menu(self):
         """
         Displays the menu for changing settings
         :return: None
         """
-        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry')
+        print('[S]ize   [O]dds    [Q]uickness   [D]esign   [G]eometry   [R]ules')
 
     def show_worlds_menu(self):
         """
         Displays the menu for pre-set worlds
         :return: None
         """
-        print("[A]corn  [L]ong L    [G]lider")
+        print("[A]corn  [L]ong L    [G]lider    [P]ew Pew Glider Gun   [B]ack")
 
     def get_worlds_command(self):
         """
@@ -206,11 +220,19 @@ class Life(object):
                     'h': 'help',
                     'a': 'display-acorn',
                     'l': 'display-l',
-                    'g': 'display-glider'}
+                    'g': 'display-glider',
+                    'p': "display-gliderGun",
+                    's': "display-snake",
+                    'b': 'thisJustGoesToTheMainMenu'}
 
         validCommands = commands.keys()
 
         userInput = '&'
+        #
+        #todo no workeee
+        #
+        if len(userInput) < 1:
+            userInput = 'b'
         while userInput[0].lower() not in validCommands:
             userInput = input(' ')
         command = commands[userInput[0].lower()]
@@ -232,6 +254,7 @@ class Life(object):
                     'p': 'save-world',
                     '#': 'load-world',
                     'i': 'interesting-worlds',
+                    'b': 'back-1gen',
                     'q':'quit'}
 
         validCommands = commands.keys()
@@ -260,6 +283,7 @@ class Life(object):
                     'd': 'change-design',
                     'o': 'new-odds',
                     'g': 'geometry',
+                    'r': 'change-rules',
                     'q': 'new-speed'}
 
         validCommands = commands.keys()
@@ -315,18 +339,73 @@ Press enter to continue""")
         :param parameter: This is the number of generations that the simulation should go through
         :return: None
         """
+        doCheck = True
         if self.__currentWorld != None:
             print("Advancing Time...")
             for times in range(0, parameter):
                 self.__currentWorld.next_generation()
                 print(self.__currentWorld)
-                if self.repetition_check():
+                if doCheck and self.repetition_check() and (parameter - times) > 1:
                     print("The world has reached a steady state.")
-                    print("Ending simulation")
-                    break
+                    doCheck = toolbox.get_boolean("Would you like to end the simulation? ")
+                    if doCheck:
+                        print("Ending simulation")
+                        break
                 sleep(self.__waitTime)
         else:
             print('You have to make a world to run the next generation.')
+
+    def change_rules(self, parameter):
+        """
+        Changes the way next generation decides which cells die and which cells come to life
+        :param parameter: This is any extra information that the user sent into this command
+        :return: None
+        """
+        if toolbox.is_integer(parameter) and \
+                1 <= int(parameter) <= (len(World.rules.keys()) + 1):
+            setNumber = int(parameter)
+            for number, set in enumerate(World.rules):
+                pass
+            numberOfSets = number + 2
+        else:
+            print('*'*80)
+            for number, set in enumerate(World.rules):
+                liveRules = ''
+                for character in World.rules[set]['liveNeeds']:
+                    liveRules += character
+                    if character != World.rules[set]['liveNeeds'][-1]:
+                        liveRules += ' or '
+                comeAliveRules = ''
+                for character in World.rules[set]['birthNeeds']:
+                    comeAliveRules += character
+                    if character != World.rules[set]['birthNeeds'][-1]:
+                        comeAliveRules += ' or '
+                stringPt1 = f'{number + 1}. Neighbors needed to survive: {liveRules}'
+                stringPt2 = f'Neighbors needed for birth: {comeAliveRules}'
+                print(f'{stringPt1:<39} {stringPt2:>39}')
+            print(f'{number + 2}: Choose your own set')
+            print('*'*80)
+            prompt = 'What character set would you like to use?'
+            setNumber = toolbox.get_integer_between(1, number + 2, prompt)
+            numberOfSets = number + 2
+
+        if setNumber == (numberOfSets):
+            liveNeeds = ''
+            birthNeeds = ''
+            addMore = True
+            while addMore == True:
+                liveNeeds += str(toolbox.get_integer_between(0, 9, "How many neighbors will cells need to live?"))
+                addMore = toolbox.get_boolean("Would you like to add anymore rules for cells to stay alive? ")
+            print()
+            addMore = True
+            while addMore == True:
+                birthNeeds += str(toolbox.get_integer_between(0, 9, "How many neighbors will dead cells need to come to life?"))
+                addMore = toolbox.get_boolean("Would you like to add anymore rules for cells to come alive? ")
+            print()
+            World.set_rules('choice', liveNeeds, birthNeeds)
+        else:
+            setString = list(World.rules.keys())[setNumber - 1]
+            World.set_rules(setString)
 
     def change_display(self, parameter):
         """
@@ -353,9 +432,6 @@ Press enter to continue""")
             numberOfSets = number + 2
 
         if setNumber == (numberOfSets):
-            #
-            #todo doesnt work with unicode characters
-            #
             liveChar = input("What would you like the live cells to look like? ")
             while liveChar == None:
                 print("The living cells cannot be nothing")
@@ -436,25 +512,39 @@ Press enter to continue""")
         #
         # Finds the old worlds size for consistency
         #
-        rows = 0
-        columns = 0
+        originalRows = 0
+        originalColumns = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
-                columns = 0
-                rows += 1
+                originalColumns = 0
+                originalRows += 1
                 for cell in row:
-                    columns += 1
-
-        columns -= 1
+                    originalColumns += 1
+        #
+        # The loop counted 1 more column than there actually is since the code counts from 0
+        # but the loop counted from 1
+        #
+        originalColumns -= 1
+        if originalRows < self.__rows:
+            rows = self.__rows
+        else:
+            rows = originalRows
+        if originalColumns < self.__columns:
+            columns = self.__columns
+        else:
+            columns = originalColumns
         self.__currentWorld = self.__worldType(rows, columns, self.__waitTime)
-
+        rowShift = round((rows-originalRows)/2)
+        columnShift = round((columns-originalColumns)/2)
         columnNumber = 0
         rowNumber = 0
         with open(filename, 'r') as oldFile:
             for row in oldFile:
                 for cell in row:
                     if cell == 'O':
-                        self.__currentWorld.set_cell(rowNumber, columnNumber, True)
+                        centeredRowNumber = int(rowNumber+rowShift)
+                        centeredColumnNumber = int(columnNumber+columnShift)
+                        self.__currentWorld.set_cell(centeredRowNumber, centeredColumnNumber, True)
                     columnNumber += 1
                 rowNumber += 1
                 columnNumber = 0
@@ -482,6 +572,19 @@ Press enter to continue""")
             print("World type set to dish")
         self.create_world()
         print("Finished!")
+
+    def rewind(self):
+        """
+        Sets the current world back one generation
+        :return: None
+        """
+        print('Finding grid...')
+        if self.__currentWorld.get_pastGrid() != None:
+            self.__currentWorld.rewind()
+            print(self.__currentWorld)
+        else:
+            print("You have to have more than one generation for this command to work.")
+        print('Finished going back 1 generation!')
 
 if __name__ == "__main__":
     #lifeTest.test1()
